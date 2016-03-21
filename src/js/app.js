@@ -3,26 +3,47 @@ var _ = require('lodash');
 
 
 var beerData = JSON.parse(document.getElementById("beerData").textContent);
+var beers = beerData.beers;
 var beerTemplate = document.getElementById("tmpl-beer").textContent;
 var beerList = document.getElementById("beerList");
 var filters = document.getElementById("filters");
 var filterLinks = filters.querySelectorAll("a");
 
-beerList.innerHTML = _.template(beerTemplate)(beerData);
 
-filters.addEventListener('click', function (e) {
-  e.preventDefault();
-  var beers = beerData.beers;
-  var clicked = e.target;
-  var filter = clicked.dataset.filter;
-  var filteredBeers = [];
-  var i;
+//Functions
+function loadBeers(b) {
+  beerList.innerHTML = _.template(beerTemplate)({ beers: b });
+}
 
+function setActiveFilter(tab) {
   for (i=0; i<filterLinks.length; i++) {
     filterLinks[i].classList.remove('btn-active');
   }
 
-  clicked.classList.add('btn-active');
+  tab.classList.add('btn-active');
+}
+// End
+
+
+
+
+
+loadBeers(beers);
+
+
+
+
+
+
+filters.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  var clickedTab = e.target;
+  var filter = clickedTab.dataset.filter;
+  var filteredBeers = [];
+  var i;
+
+  setActiveFilter(clickedTab);
 
   switch (filter) {
     case 'all':
@@ -65,5 +86,6 @@ filters.addEventListener('click', function (e) {
       break;
   }
 
-  beerList.innerHTML = _.template(beerTemplate)({ beers: filteredBeers });
+  loadBeers(filteredBeers);
+
 });
