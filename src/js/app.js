@@ -16,11 +16,44 @@ function loadBeers(b) {
 }
 
 function setActiveFilter(tab) {
-  for (i=0; i<filterLinks.length; i++) {
+  for (var i=0; i<filterLinks.length; i++) {
     filterLinks[i].classList.remove('btn-active');
   }
 
   tab.classList.add('btn-active');
+}
+
+function filterBeers(property, value) {
+  var filteredBeers = [];
+
+  for (var i=0; i<beers.length; i++) {
+    if (compareValues(beers[i], property, value)) {
+      filteredBeers.push(beers[i]);
+    }
+  }
+
+  return filteredBeers;
+}
+
+function makeFilter(property) {
+  return function (value) {
+    return filterBeers (property, value);
+  }
+}
+
+var filterByLocale = makeFilter('locale');
+var filterByType = makeFilter('type');
+
+function compareValues(item, property, value) {
+  if (!Array.isArray(value)) {
+      return item[property] === value;
+  }
+  for (var i=0; i<value.length; i++) {
+    if (item[property] === value[i]) {
+      return true;
+    }
+  }
+  return false;
 }
 // End
 
@@ -41,7 +74,6 @@ filters.addEventListener('click', function (e) {
   var clickedTab = e.target;
   var filter = clickedTab.dataset.filter;
   var filteredBeers = [];
-  var i;
 
   setActiveFilter(clickedTab);
 
@@ -50,39 +82,19 @@ filters.addEventListener('click', function (e) {
       filteredBeers = beers;
       break;
     case 'domestic':
-      for (i=0; i<beers.length; i++) {
-        if (beers[i].locale === 'domestic') {
-          filteredBeers.push(beers[i]);
-        }
-      }
+      filteredBeers = filterByLocale('domestic');
       break;
     case 'imports':
-      for (i=0; i<beers.length; i++) {
-        if (beers[i].locale === 'import') {
-          filteredBeers.push(beers[i]);
-        }
-      }
+      filteredBeers = filterByLocale('import');
       break;
     case 'ale':
-      for (i=0; i<beers.length; i++) {
-        if (beers[i].type === 'ipa' || beers[i].type === 'ale') {
-          filteredBeers.push(beers[i]);
-        }
-      }
+      filteredBeers = filterByType(['ipa', 'ale']);
       break;
     case 'lager':
-      for (i=0; i<beers.length; i++) {
-        if (beers[i].type === 'lager') {
-          filteredBeers.push(beers[i]);
-        }
-      }
+      filteredBeers = filterByType('lager');
       break;
     case 'stout':
-      for (i=0; i<beers.length; i++) {
-        if (beers[i].type === 'stout') {
-          filteredBeers.push(beers[i]);
-        }
-      }
+      filteredBeers = filterByType('stout');
       break;
   }
 
