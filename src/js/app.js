@@ -3,7 +3,7 @@ var _ = require('lodash');
 
 
 var beerData = JSON.parse(document.getElementById("beerData").textContent);
-var beers = beerData.beers;
+var allBeers = beerData.beers;
 var beerTemplate = document.getElementById("tmpl-beer").textContent;
 var beerList = document.getElementById("beerList");
 var filters = document.getElementById("filters");
@@ -23,11 +23,23 @@ function setActiveFilter(tab) {
   tab.classList.add('btn-active');
 }
 
-function filterBeers(property, value) {
+// function compareValues(item, property, value) {
+//   if (!Array.isArray(value)) {
+//       return item[property] === value;
+//   }
+//   for (var i=0; i<value.length; i++) {
+//     if (item[property] === value[i]) {
+//       return true;
+//     }
+//   }
+//   return false;
+// }
+
+function filterBeers(beers, callback) {
   var filteredBeers = [];
 
   for (var i=0; i<beers.length; i++) {
-    if (compareValues(beers[i], property, value)) {
+    if (callback(beers[i])) {
       filteredBeers.push(beers[i]);
     }
   }
@@ -35,33 +47,25 @@ function filterBeers(property, value) {
   return filteredBeers;
 }
 
-function makeFilter(property) {
+function makeFilter(beers, property) {
   return function (value) {
-    return filterBeers (property, value);
+    return filterBeers (beers, function (beer) {
+      return beer[property] === value;
+    });
   }
 }
 
-var filterByLocale = makeFilter('locale');
-var filterByType = makeFilter('type');
+var filterByLocale = makeFilter(allBeers, 'locale');
+var filterByType = makeFilter(allBeers, 'type');
 
-function compareValues(item, property, value) {
-  if (!Array.isArray(value)) {
-      return item[property] === value;
-  }
-  for (var i=0; i<value.length; i++) {
-    if (item[property] === value[i]) {
-      return true;
-    }
-  }
-  return false;
-}
+
 // End
 
 
 
 
 
-loadBeers(beers);
+loadBeers(allBeers);
 
 
 
@@ -79,7 +83,7 @@ filters.addEventListener('click', function (e) {
 
   switch (filter) {
     case 'all':
-      filteredBeers = beers;
+      filteredBeers = allBeers;
       break;
     case 'domestic':
       filteredBeers = filterByLocale('domestic');
@@ -88,7 +92,9 @@ filters.addEventListener('click', function (e) {
       filteredBeers = filterByLocale('import');
       break;
     case 'ale':
-      filteredBeers = filterByType(['ipa', 'ale']);
+      filteredBeers = filterBeers(function (beer) {
+        return beer.type === 'ale' || beer.type === 'ipa';
+      });
       break;
     case 'lager':
       filteredBeers = filterByType('lager');
