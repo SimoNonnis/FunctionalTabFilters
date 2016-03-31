@@ -23,34 +23,24 @@ function setActiveFilter(tab) {
   tab.classList.add('btn-active');
 }
 
-// function compareValues(item, property, value) {
-//   if (!Array.isArray(value)) {
-//       return item[property] === value;
-//   }
-//   for (var i=0; i<value.length; i++) {
-//     if (item[property] === value[i]) {
-//       return true;
-//     }
-//   }
-//   return false;
-// }
 
-function filterBeers(beers, callback) {
-  var filteredBeers = [];
 
-  for (var i=0; i<beers.length; i++) {
-    if (callback(beers[i])) {
-      filteredBeers.push(beers[i]);
+function filter(collection, callback) {
+  var filtered = [];
+
+  for (var i=0; i<collection.length; i++) {
+    if (callback(collection[i])) {
+      filtered.push(collection[i]);
     }
   }
 
-  return filteredBeers;
+  return filtered;
 }
 
-function makeFilter(beers, property) {
+function makeFilter(collection, property) {
   return function (value) {
-    return filterBeers (beers, function (beer) {
-      return beer[property] === value;
+    return filter (collection, function (item) {
+      return item[property] === value;
     });
   }
 }
@@ -76,12 +66,12 @@ filters.addEventListener('click', function (e) {
   e.preventDefault();
 
   var clickedTab = e.target;
-  var filter = clickedTab.dataset.filter;
+  var filterName = clickedTab.dataset.filter;
   var filteredBeers = [];
 
   setActiveFilter(clickedTab);
 
-  switch (filter) {
+  switch (filterName) {
     case 'all':
       filteredBeers = allBeers;
       break;
@@ -92,7 +82,7 @@ filters.addEventListener('click', function (e) {
       filteredBeers = filterByLocale('import');
       break;
     case 'ale':
-      filteredBeers = filterBeers(function (beer) {
+      filteredBeers = filter(allBeers, function (beer) {
         return beer.type === 'ale' || beer.type === 'ipa';
       });
       break;
