@@ -1,20 +1,82 @@
 var _ = require('lodash');
 
 
-
+//Variables
 var beerData = JSON.parse(document.getElementById("beerData").textContent);
 var allBeers = beerData.beers;
-var beerTemplate = document.getElementById("tmpl-beer").textContent;
+var beerTemplate = document.getElementById("tmpl-beer-groups").textContent;
 var beerList = document.getElementById("beerList");
 var averageAbv = document.getElementById("averageAbv");
 var filters = document.getElementById("filters");
 var filterLinks = filters.querySelectorAll("a");
 
-
 //Functions
-function loadBeers(b) {
-  beerList.innerHTML = _.template(beerTemplate)({ beers: b });
-  averageAbv.innerHTML = 'Average ABV: ' + getAverageAbv(b) + '%';
+var fp = {};
+
+//filter
+fp.filter = function (collection, callback) {
+  var filtered = [];
+
+  for (var i=0; i<collection.length; i++) {
+    if (callback(collection[i])) {
+      filtered.push(collection[i]);
+    }
+  }
+
+  return filtered;
+};
+
+//map
+fp.map = function (collection, callback) {
+  var mapped = [];
+
+  for (var i=0;i<collection.length; i++) {
+    mapped.push(callback(collection[i]));
+  }
+
+  return mapped;
+};
+
+//reduce
+fp.reduce = function (collection, callback, initial) {
+  var last = initial;
+
+  for (var i=0;i<collection.length; i++) {
+    last = callback(last, collection[i]);
+  }
+
+  return last;
+};
+
+//add
+fp.add = function (a, b) {
+  return a + b
+};
+
+//groupBy
+fp.groupBy = function (collection, callback) {
+  var groups = {};
+  var key;
+  for (var i=0; i<collection.length; i++) {
+    key = callback(collection[i]);
+    if (groups[key]) {
+      groups[key].push(collection[i]);
+    } else {
+      groups[key] = [collection[i]];
+    }
+  }
+  return groups;
+};
+
+
+
+
+function loadBeers(allBeers) {
+  var beerGroups = fp.groupBy(allBeers, function (beer) {
+    return beer.locale;
+  });
+  beerList.innerHTML = _.template(beerTemplate)({ beers: beerGroups });
+  averageAbv.innerHTML = 'Average ABV: ' + getAverageAbv(allBeers) + '%';
 }
 
 function setActiveFilter(tab) {
@@ -25,73 +87,35 @@ function setActiveFilter(tab) {
   tab.classList.add('btn-active');
 }
 
-
-
-function filter(collection, callback) {
-  var filtered = [];
-
-  for (var i=0; i<collection.length; i++) {
-    if (callback(collection[i])) {
-      filtered.push(collection[i]);
-    }
-  }
-
-  return filtered;
-}
-
-function makeFilter(collection, property) {
+//makeFilter
+function makeFilter (collection, property) {
   return function (value) {
-    return filter (collection, function (item) {
+    return fp.filter (collection, function (item) {
       return item[property] === value;
     });
   }
 }
 
-function map(collection, callback) {
-  var mapped = [];
 
-  for (var i=0;i<collection.length; i++) {
-    mapped.push(callback(collection[i]));
-  }
 
-  return mapped;
-
-}
-
-function reduce(collection, callback, initial) {
-  var last = initial;
-
-  for (var i=0;i<collection.length; i++) {
-    last = callback(last, collection[i]);
-  }
-
-  return last;
-
-}
-
-function add(a, b) {
-  return a + b
-}
 
 function getAverageAbv(beers) {
-  var abvs = map(beers, function (beer) {
+  var abvs = fp.map(beers, function (beer) {
     return beer.abv;
   });
 
-  var total = reduce(abvs, add, 0);
+  var total = fp.reduce(abvs, fp.add, 0);
 
   return total = Math.round((total / beers.length) * 10) / 10;
 }
-
-var filterByLocale = makeFilter(allBeers, 'locale');
-var filterByType = makeFilter(allBeers, 'type');
-
-
 // End
 
 
 
 
+
+var filterByLocale = makeFilter(allBeers, 'locale');
+var filterByType = makeFilter(allBeers, 'type');
 
 loadBeers(allBeers);
 
@@ -120,7 +144,7 @@ filters.addEventListener('click', function (e) {
       filteredBeers = filterByLocale('import');
       break;
     case 'ale':
-      filteredBeers = filter(allBeers, function (beer) {
+      filteredBeers = fp.filter(allBeers, function (beer) {
         return beer.type === 'ale' || beer.type === 'ipa';
       });
       break;

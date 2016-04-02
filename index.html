@@ -34,8 +34,8 @@ instructions how to enable JavaScript in your web browser</a>.
 
          <div id="filters">
             <a href="#" class="btn-active" data-filter="all">All</a>
-            <a href="#" class="" data-filter="domestic">Domestic</a>
-            <a href="#" class="" data-filter="imports">Imports</a>
+            <!-- <a href="#" class="" data-filter="domestic">Domestic</a>
+            <a href="#" class="" data-filter="imports">Imports</a> -->
             <a href="#" class="" data-filter="ale">Ales</a>
             <a href="#" class="" data-filter="lager">Lagers</a>
             <a href="#" class="" data-filter="stout">Stouts</a>
@@ -67,6 +67,17 @@ instructions how to enable JavaScript in your web browser</a>.
         <script type="text/template" id="tmpl-beer">
         <% _.forEach(beers, function (beer) { %>
         <li><%= beer.name %> <small>(<%= beer.abv %>%)</small></li>
+        <% }); %>
+        </script>
+
+        <script type="text/template" id="tmpl-beer-groups">
+        <% _.forEach(beers, function (group, name) { %>
+            <div class="beer-group">
+            <h3><%= name.charAt(0).toUpperCase() + name.slice(1) %>s</h3>
+            <% _.forEach(group, function (beer) { %>
+                <li<% if (beer.special) { %> class='special'<% } %>><%= beer.name %> <small>(<%= beer.abv %>%)</small></li>
+            <% }); %>
+            </div>
         <% }); %>
         </script>
 
