@@ -1,6 +1,7 @@
 var _ = require('lodash');
 
 
+
 //Variables
 var beerData = JSON.parse(document.getElementById("beerData").textContent);
 var allBeers = beerData.beers;
@@ -11,83 +12,83 @@ var filters = document.getElementById("filters");
 var filterLinks = filters.querySelectorAll("a");
 
 //Functions
-var fp = {};
+// var fp = {};
 
 //filter
-fp.filter = function (collection, callback) {
-  var filtered = [];
-
-  for (var i=0; i<collection.length; i++) {
-    if (callback(collection[i])) {
-      filtered.push(collection[i]);
-    }
-  }
-
-  return filtered;
-};
+// fp.filter = function (collection, callback) {
+//   var filtered = [];
+//
+//   for (var i=0; i<collection.length; i++) {
+//     if (callback(collection[i])) {
+//       filtered.push(collection[i]);
+//     }
+//   }
+//
+//   return filtered;
+// };
 
 //map
-fp.map = function (collection, callback) {
-  var mapped = [];
-
-  for (var i=0;i<collection.length; i++) {
-    mapped.push(callback(collection[i]));
-  }
-
-  return mapped;
-};
+// fp.map = function (collection, callback) {
+//   var mapped = [];
+//
+//   for (var i=0;i<collection.length; i++) {
+//     mapped.push(callback(collection[i]));
+//   }
+//
+//   return mapped;
+// };
 
 //reduce
-fp.reduce = function (collection, callback, initial) {
-  var last = initial;
-
-  for (var i=0;i<collection.length; i++) {
-    last = callback(last, collection[i]);
-  }
-
-  return last;
-};
+// fp.reduce = function (collection, callback, initial) {
+//   var last = initial;
+//
+//   for (var i=0;i<collection.length; i++) {
+//     last = callback(last, collection[i]);
+//   }
+//
+//   return last;
+// };
 
 //add
-fp.add = function (a, b) {
-  return a + b
-};
+// fp.add = function (a, b) {
+//   return a + b
+// };
 
 //groupBy
-fp.groupBy = function (collection, callback) {
-  var groups = {};
-  var key;
-  for (var i=0; i<collection.length; i++) {
-    key = callback(collection[i]);
-    if (groups[key]) {
-      groups[key].push(collection[i]);
-    } else {
-      groups[key] = [collection[i]];
-    }
-  }
-  return groups;
-};
+// fp.groupBy = function (collection, callback) {
+//   var groups = {};
+//   var key;
+//   for (var i=0; i<collection.length; i++) {
+//     key = callback(collection[i]);
+//     if (groups[key]) {
+//       groups[key].push(collection[i]);
+//     } else {
+//       groups[key] = [collection[i]];
+//     }
+//   }
+//   return groups;
+// };
 
 //pluck
-fp.pluck = function (collection, property) {
-  return fp.map(collection, function (item) {
-    return item[property];
-  })
-};
+// fp.pluck = function (collection, property) {
+//   return fp.map(collection, function (item) {
+//     return item[property];
+//   })
+// };
 
 //mean
-fp.mean = function (collection, property) {
-  if (property) {
-    collection = fp.pluck(collection, property);
-  }
-  return fp.reduce(collection, fp.add, 0) / collection.length;
-};
+// fp.mean = function (collection, property) {
+//   if (property) {
+//     collection = fp.pluck(collection, property);
+//   }
+//   return fp.reduce(collection, fp.add, 0) / collection.length;
+// };
 
 
 
 
 function loadBeers(allBeers) {
-  var beerGroups = fp.groupBy(allBeers, function (beer) {
+  var beerGroups = _.groupBy(allBeers, function (beer) {
     return beer.locale;
   });
   beerList.innerHTML = _.template(beerTemplate)({ beers: beerGroups });
@@ -105,7 +106,7 @@ function setActiveFilter(tab) {
 //makeFilter
 function makeFilter (collection, property) {
   return function (value) {
-    return fp.filter (collection, function (item) {
+    return _.filter (collection, function (item) {
       return item[property] === value;
     });
   }
@@ -118,7 +119,7 @@ function roundDecimal(number, places) {
 
 
 function getAverageAbv(beers) {
-  var mean = fp.mean(beers, 'abv');
+  var mean = _.mean(beers, 'abv');
 
   return roundDecimal(mean, 1);
 }
@@ -158,7 +159,7 @@ filters.addEventListener('click', function (e) {
       filteredBeers = filterByLocale('import');
       break;
     case 'ale':
-      filteredBeers = fp.filter(allBeers, function (beer) {
+      filteredBeers = _.filter(allBeers, function (beer) {
         return beer.type === 'ale' || beer.type === 'ipa';
       });
       break;
